@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hacker Programı v2.0</title>
+<style>
+*{box-sizing:border-box}
+body{background:#050805;color:#00ff41;font-family:'Courier New',monospace;margin:0;padding:16px;min-height:100vh;position:relative}
+body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));z-index:999;background-size:100% 4px, 6px 100%;pointer-events:none}
+.container{max-width:560px;margin:0 auto;position:relative;z-index:1}
+h1{text-align:center;text-shadow:0 0 15px #00ff41;font-size:28px;margin:10px 0 4px;letter-spacing:2px}
+.subtitle{text-align:center;color:#9affb3;font-size:13px;margin-bottom:20px;text-transform:uppercase}
+.card{background:#0d140d;border:1px solid #00ff41;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 0 20px rgba(0,255,65,0.12)}
+label{display:block;margin:12px 0 6px;font-weight:bold;font-size:14px}
+input, select{width:100%;padding:12px;border-radius:10px;border:1px solid #00ff41;background:#000;color:#00ff41;font-size:15px;outline:none;font-family:'Courier New',monospace}
+input:focus, select:focus{box-shadow:0 0 8px #00ff41}
+button{width:100%;padding:13px;margin-top:10px;border:none;border-radius:10px;background:#00ff41;color:#000;font-weight:bold;font-size:15px;cursor:pointer;transition:0.2s}
+button:hover{background:#00cc33;box-shadow:0 0 10px #00ff41}
+button:active{transform:scale(0.98)}
+button.secondary{background:transparent;color:#00ff41;border:1px solid #00ff41}
+button.secondary:hover{background:rgba(0,255,65,0.1)}
+button.danger{background:#ff2e2e;color:#fff}
+button.danger:hover{background:#cc0000}
+button.admin{background:#ffd700;color:#000}
+button.admin:hover{background:#cca600}
+.row{display:flex;gap:8px}.row button{flex:1}
+.hidden{display:none!important}
+.msg{white-space:pre-wrap;background:#000;border:1px solid #222;border-radius:10px;padding:12px;margin-top:12px;line-height:1.6;word-break:break-word;font-size:14px;color:#a6ffa6}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:#000}th,td{border:1px solid #00ff41;padding:8px;text-align:left;font-size:13px}th{background:#0f2a16}
+.small{font-size:12px;color:#7acc8f;text-align:center;margin-top:10px;line-height:1.5}
+.badge{display:inline-block;background:#00ff41;color:#000;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold}
+.alert-box{background:#300;border:1px solid #ff2e2e;color:#ff9999;padding:10px;border-radius:8px;margin-top:10px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>💻 HACKER PROGRAMI v2.0</h1>
+<div class="subtitle">Güvenli Terminal Konsolu</div>
+
+<!-- GİRİŞ / KAYIT EKRANI -->
+<div id="loginScreen" class="card">
+  <div style="text-align:center"><span class="badge">SİSTEM ERİŞİMİ</span></div>
+  <label>Kullanıcı Adı:</label>
+  <input id="inpUser" placeholder="Örn: arda10" autocomplete="off">
+  <label>Gerçek İsmin:</label>
+  <input id="inpReal" placeholder="Örn: Muhammed Arda" autocomplete="off">
+  <label>Şifren:</label>
+  <input id="inpPass" type="password" placeholder="En az 4 karakter">
+  <div class="row">
+    <button type="button" onclick="doRegister()">Kayıt Ol</button>
+    <button type="button" onclick="doLogin()">Giriş Yap</button>
+  </div>
+  <div id="loginMsg" class="msg hidden"></div>
+  <div class="small">Kullanıcı adı büyük/küçük harfe duyarlıdır.<br>3 hatalı girişten sonra oturum bloklanır.</div>
+</div>
+
+<!-- ANA KONTROL PANELİ -->
+<div id="mainScreen" class="hidden">
+  <div class="card">
+    <div>Erişim Sağlandı: <b id="welcomeName"></b> <span id="welcomeUser" style="color:#7acc8f"></span></div>
+    <div class="small" id="welcomeReal" style="text-align:left; margin-top:4px;"></div>
+    
+    <label>Veri / Mesaj Girişi:</label>
+    <input id="inpMsg" placeholder="Şifrelenecek veya çözülecek metin..." autocomplete="off">
+    
+    <label>Sezar Kaydırma / Parametre:</label>
+    <input id="inpShift" type="number" value="5">
+
+    <div class="row">
+      <button type="button" onclick="doEncrypt()">Şifrele</button>
+      <button type="button" onclick="doDecrypt()">Çöz</button>
+    </div>
+    <div class="row">
+      <button type="button" onclick="doCrack()">Brute-Force Kır</button>
+      <button type="button" onclick="doReverse()">Ters Çevir</button>
+    </div>
+    <div class="row">
+      <button type="button" class="secondary" onclick="doBase64Enc()">Base64 Encode</button>
+      <button type="button" class="secondary" onclick="doBase64Dec()">Base64 Decode</button>
+    </div>
+
+    <div id="resultBox" class="msg hidden"></div>
+
+    <div class="row" style="margin-top:15px">
+      <button type="button" class="secondary" onclick="showProfile()">Profilim</button>
+      <button type="button" class="secondary" onclick="showMessages()">İşlem Geçmişi</button>
+    </div>
+    <div class="row">
+      <button type="button" class="secondary" onclick="changePass()">Şifre Değiştir</button>
+      <button type="button" class="secondary" onclick="deleteMyMessages()">Geçmişi Temizle</button>
+    </div>
+    
+    <button type="button" id="adminBtn" class="admin hidden" onclick="showAdmin()">🔐 Root Admin Paneli</button>
+    
+    <div class="row">
+      <button type="button" class="danger" onclick="deleteAccount()">Hesabımı Sil</button>
+      <button type="button" class="danger" onclick="logout()">Güvenli Çıkış</button>
+    </div>
+  </div>
+
+  <div id="profileBox" class="card hidden"></div>
+  <div id="messagesBox" class="card hidden"></div>
+  <div id="adminBox" class="card hidden"></div>
+</div>
+
+<div class="small">Hacker Programı • Güvenli Çekirdek v2.0 • 2026</div>
+</div>
+
+<script>
+let currentUser = null;
+let attempts = 0;
+
+// Kullanıcı Veritabanı İşlemleri
+function getUsers(){
+  try{
+    let u = JSON.parse(localStorage.getItem('hacker_users') || 'null');
+    if(!u){
+      u = [
+        {user:'arda10', real:'Muhammed Arda', pass:'Rad35go69_'},
+        {user:'Rad35go69_', real:'Rad35go69_', pass:'Rad35go69_'}
+      ];
+      localStorage.setItem('hacker_users', JSON.stringify(u));
+    }
+    return u;
+  }catch(e){ return []; }
+}
+
+function saveUsers(u){ 
+  localStorage.setItem('hacker_users', JSON.stringify(u)); 
+}
+
+function titleCase(s){ 
+  return s.trim().toLowerCase().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); 
+}
+
+function showMsg(id, txt, isError = false){ 
+  const el = document.getElementById(id); 
+  el.textContent = txt; 
+  el.classList.remove('hidden');
+  if(isError) {
+    el.style.borderColor = '#ff2e2e';
+    el.style.color = '#ff9999';
+  } else {
+    el.style.borderColor = '#00ff41';
+    el.style.color = '#a6ffa6';
+  }
+}
+
+// Güvenli Metin Temizleme (XSS Önlemi)
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
+
+// Ziyaretçi Sayacı
+function getVisitCount(){ 
+  let c = parseInt(localStorage.getItem('hacker_visit_count') || '0', 10); 
+  return isNaN(c) ? 0 : c; 
+}
+
+function incVisit(){ 
+  let c = getVisitCount() + 1; 
+  localStorage.setItem('hacker_visit_count', String(c)); 
+  localStorage.setItem('hacker_last_visit', new Date().toLocaleString('tr-TR')); 
+  return c; 
+}
+incVisit();
+
+// Kayıt Olma Fonksiyonu
+function doRegister(){
+  const user = document.getElementById('inpUser').value.trim();
+  const real = document.getElementById('inpReal').value.trim();
+  const pass = document.getElementById('inpPass').value;
+  
+  if(!user || !real || !pass){ showMsg('loginMsg', 'Lütfen tüm alanları doldurun!', true); return; }
+  if(pass.length < 4){ showMsg('loginMsg', 'Şifre en az 4 karakter olmalıdır!', true); return; }
+  
+  let users = getUsers();
+  for(let i = 0; i < users.length; i++){ 
+    if(users[i].user === user){ showMsg('loginMsg', 'Bu kullanıcı adı zaten alınmış!', true); return; } 
+  }
+  
+  users.push({user: user, real: titleCase(real), pass: pass}); 
+  saveUsers(users);
+  showMsg('loginMsg', 'Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
+}
+
+// Giriş Logları
+function addLogin(user, ok){
+  let key = 'hacker_logins_' + user; 
+  let arr = [];
+  try{ arr = JSON.parse(localStorage.getItem(key) || '[]'); }catch(e){ arr = []; }
+  arr.unshift({date: new Date().toLocaleString('tr-TR'), ok: ok}); 
+  arr = arr.slice(0, 20);
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+// Giriş Yapma Fonksiyonu
+function doLogin(){
+  const user = document.getElementById('inpUser').value.trim();
+  const real = document.getElementById('inpReal').value.trim();
+  const pass = document.getElementById('inpPass').value;
+  
+  if(!user || !pass){ showMsg('loginMsg', 'Kullanıcı adı ve şifre zorunludur!', true); return; }
+  
+  let users = getUsers();
+  let found = users.find(u => u.user === user);
+  
+  if(!found){ 
+    attempts++; 
+    addLogin(user, false); 
+    if(attempts >= 3){ showMsg('loginMsg', '3 Hatalı deneme! Oturum kilitlendi.', true); attempts = 0; return; } 
+    showMsg('loginMsg', `Kullanıcı bulunamadı! Kalan hak: ${3 - attempts}`, true); 
+    return; 
+  }
+  
+  if(found.pass !== pass){ 
+    attempts++; 
+    addLogin(user, false); 
+    if(attempts >= 3){ showMsg('loginMsg', '3 Hatalı şifre denemesi! Oturum kilitlendi.', true); attempts = 0; return; } 
+    showMsg('loginMsg', `Şifre hatalı! Kalan hak: ${3 - attempts}`, true); 
+    return; 
+  }
+  
+  if(real && titleCase(real) !== found.real){ 
+    showMsg('loginMsg', `Gerçek isim uyuşmuyor! Kayıtlı: ${found.real}`, true); 
+    return; 
+  }
+  
+  attempts = 0; 
+  addLogin(user, true); 
+  currentUser = found;
+  
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainScreen').classList.remove('hidden');
+  document.getElementById('welcomeName').textContent = found.real;
+  document.getElementById('welcomeUser').textContent = `(${found.user})`;
+  document.getElementById('welcomeReal').textContent = 'Sistem Yetkilendirmesi Onaylandı ✅';
+  
+  document.getElementById('profileBox').classList.add('hidden');
+  document.getElementById('messagesBox').classList.add('hidden');
+  document.getElementById('adminBox').classList.add('hidden');
+  
+  if(found.user === 'arda10'){ 
+    document.getElementById('adminBtn').classList.remove('hidden'); 
+  } else { 
+    document.getElementById('adminBtn').classList.add('hidden'); 
+  }
+}
+
+// Mesaj & İşlem Geçmişi Yönetimi
+function getMessages(){ 
+  try{ return JSON.parse(localStorage.getItem('hacker_msgs_' + currentUser.user) || '[]'); }catch(e){ return []; } 
+}
+
+function saveMessage(input, op, output){ 
+  let arr = getMessages(); 
+  arr.unshift({yazdigin: input, islem: op, cikti: output, tarih: new Date().toLocaleString('tr-TR')}); 
+  localStorage.setItem('hacker_msgs_' + currentUser.user, JSON.stringify(arr)); 
+}
+
+// Kripto Algoritmaları
+function caesar(text, shift){ 
+  let out = ''; 
+  for(let i = 0; i < text.length; i++){ 
+    let code = text.charCodeAt(i); 
+    if(code >= 32 && code <= 126){ 
+      let nc = 32 + (((code - 32 + shift) % 95) + 95) % 95; 
+      out += String.fromCharCode(nc); 
+    } else { 
+      out += text[i]; 
+    } 
+  } 
+  return out; 
+}
+
+function doEncrypt(){ 
+  if(!currentUser) return; 
+  let txt = document.getElementById('inpMsg').value; 
+  let s = parseInt(document.getElementById('inpShift').value, 10) || 5; 
+  if(!txt){ showMsg('resultBox', 'Önce şifrelenecek metni girin!', true); return; } 
+  let out = caesar(txt, s); 
+  saveMessage(txt, `Şifrele (${s})`, out); 
+  showMsg('resultBox', `Girdi: ${txt}\nİşlem: Sezar Şifreleme\nÇıktı: ${out}`); 
+}
+
+function doDecrypt(){ 
+  if(!currentUser) return; 
+  let txt = document.getElementById('inpMsg').value; 
+  let s = parseInt(document.getElementById('inpShift.value') || document.getElementById('inpShift').value, 10) || 5; 
+  if(!txt){ showMsg('resultBox', 'Önce çözülecek metni girin!', true); return; } 
+  let out = caesar(txt, -s); 
+  saveMessage(txt, `Çöz (${s})`, out); 
+  showMsg('resultBox', `Girdi: ${txt}\nİşlem: Sezar Çözme\nÇıktı: ${out}`); 
+}
+
+function doCrack(){ 
+  if(!currentUser) return; 
+  let txt = document.getElementById('inpMsg').value; 
+  if(!txt){ showMsg('resultBox', 'Önce kırılacak metni girin!', true); return; } 
+  let lines = ['--- BRUTE-FORCE ANALİZİ ---']; 
+  for(let i = 1; i <= 25; i++){ 
+    lines.push(`Kaydırma ${i}: ${caesar(txt, -i)}`); 
+  } 
+  let joined = lines.join('\n'); 
+  saveMessage(txt, 'Brute-Force Kır', joined); 
+  showMsg('resultBox', joined); 
+}
+
+function doReverse(){ 
+  if(!currentUser) return; 
+  let txt = document.getElementById('inpMsg').value; 
+  if(!txt){ showMsg('resultBox', 'Önce metni girin!', true); return; } 
+  let out = txt.split('').reverse().join(''); 
+  saveMessage(txt, 'Ters Çevir', out); 
+  showMsg('resultBox', `Girdi: ${txt}\nİşlem: Ters Çevirme\nÇıktı: ${out}`); 
+}
+
+function doBase64Enc(){
+  if(!currentUser) return;
+  let txt = document.getElementById('inpMsg').value;
+  if(!txt){ showMsg('resultBox', 'Önce metni girin!', true); return; }
+  try {
+    let out = btoa(unescape(encodeURIComponent(txt)));
+    saveMessage(txt, 'Base64 Encode', out);
+    showMsg('resultBox', `Girdi: ${txt}\nİşlem: Base64 Encode\nÇıktı: ${out}`);
+  } catch(e) {
+    showMsg('resultBox', 'Kodlama hatası!', true);
+  }
+}
+
+function doBase64Dec(){
+  if(!currentUser) return;
+  let txt = document.getElementById('inpMsg').value;
+  if(!txt){ showMsg('resultBox', 'Önce metni girin!', true); return; }
+  try {
+    let out = decodeURIComponent(escape(atob(txt)));
+    saveMessage(txt, 'Base64 Decode', out);
+    showMsg('resultBox', `Girdi: ${txt}\nİşlem: Base64 Decode\nÇıktı: ${out}`);
+  } catch(e) {
+    showMsg('resultBox', 'Geçersiz Base64 formatı!', true);
+  }
+}
+
+// Profil ve Geçmiş Ekranları
+function showProfile(){
+  document.getElementById('adminBox').classList.add('hidden');
+  document.getElementById('messagesBox').classList.add('hidden');
+  
+  let msgs = getMessages(); 
+  let logins = [];
+  try{ logins = JSON.parse(localStorage.getItem('hacker_logins_' + currentUser.user) || '[]'); }catch(e){ logins = []; }
+  
+  let html = `<h3>👤 Kullanıcı Profili</h3>
+    <b>Kullanıcı Adı:</b> ${escapeHTML(currentUser.user)}<br>
+    <b>Gerçek İsim:</b> ${escapeHTML(currentUser.real)}<br>
+    <b>Toplam İşlem:</b> ${msgs.length}<br><br>
+    <b>Son Oturum Açma Denemeleri:</b><br>`;
+    
+  for(let i = 0; i < Math.min(5, logins.length); i++){ 
+    html += `${logins[i].ok ? '✅ Başarılı' : '❌ Başarısız'} - ${logins[i].date}<br>`; 
+  }
+  if(logins.length === 0) html += 'Henüz kayıtlı oturum geçmişi yok.<br>';
+  
+  let el = document.getElementById('profileBox'); 
+  el.innerHTML = html; 
+  el.classList.remove('hidden');
+}
+
+function showMessages(){
+  document.getElementById('adminBox').classList.add('hidden');
+  document.getElementById('profileBox').classList.add('hidden');
+  
+  let msgs = getMessages(); 
+  let html = `<h3>💬 İşlem Geçmişi (Toplam: ${msgs.length})</h3>`;
+  if(msgs.length === 0) html += 'Henüz kayıtlı işlem yok.';
+  
+  for(let i = 0; i < msgs.length; i++){ 
+    html += `<div class="msg"><b>Girdi:</b> ${escapeHTML(msgs[i].yazdigin)}<br><b>İşlem:</b> ${escapeHTML(msgs[i].islem)}<br><b>Çıktı:</b> ${escapeHTML(msgs[i].cikti)}<br><span style="color:#7acc8f;font-size:11px">Tarih: ${msgs[i].tarih}</span></div>`; 
+  }
+  
+  let el = document.getElementById('messagesBox'); 
+  el.innerHTML = html; 
+  el.classList.remove('hidden');
+}
+
+function deleteMyMessages(){ 
+  if(!confirm('İşlem geçmişiniz silinsin mi?')) return; 
+  localStorage.removeItem('hacker_msgs_' + currentUser.user); 
+  showMsg('resultBox', 'İşlem geçmişi başarıyla temizlendi.'); 
+}
+
+function changePass(){ 
+  let np = prompt('Yeni şifrenizi girin (En az 4 karakter):'); 
+  if(!np) return; 
+  if(np.length < 4){ alert('Şifre en az 4 karakter olmalıdır!'); return; } 
+  
+  let users = getUsers(); 
+  for(let i = 0; i < users.length; i++){ 
+    if(users[i].user === currentUser.user){ users[i].pass = np; break; } 
+  } 
+  saveUsers(users); 
+  currentUser.pass = np; 
+  alert('Şifreniz başarıyla değiştirildi.'); 
+}
+
+function deleteAccount(){ 
+  if(!confirm('Hesabınız kalıcı olarak silinecektir. Emin misiniz?')) return; 
+  let users = getUsers(); 
+  let nu = users.filter(u => u.user !== currentUser.user);
+  saveUsers(nu); 
+  localStorage.removeItem('hacker_msgs_' + currentUser.user); 
+  localStorage.removeItem('hacker_logins_' + currentUser.user); 
+  alert('Hesabınız silindi.'); 
+  logout(); 
+}
+
+function logout(){ 
+  currentUser = null; 
+  attempts = 0; 
+  document.getElementById('mainScreen').classList.add('hidden'); 
+  document.getElementById('loginScreen').classList.remove('hidden'); 
+  document.getElementById('inpPass').value = ''; 
+  showMsg('loginMsg', 'Güvenli çıkış yapıldı.'); 
+}
+
+// Admin Paneli
+function showAdmin(){
+  if(!currentUser || currentUser.user !== 'arda10'){ alert('Yetkisiz erişim girişimi!'); return; }
+  
+  let users = getUsers(); 
+  let visits = getVisitCount(); 
+  let last = localStorage.getItem('hacker_last_visit') || '-';
+  
+  let html = `<h3>🔐 Root Admin Paneli</h3>
+    <b>Toplam Ziyaretçi:</b> ${visits}<br>
+    <b>Son Ziyaret:</b> ${last}<br>
+    <b>Kayıtlı Kullanıcı Sayısı:</b> ${users.length}<br><br>
+    <b>Kullanıcı Listesi:</b>
+    <table>
+      <tr><th>K. Adı</th><th>Gerçek İsim</th><th>Şifre</th></tr>`;
+      
+  for(let i = 0; i < users.length; i++){ 
+    html += `<tr><td>${escapeHTML(users[i].user)}</td><td>${escapeHTML(users[i].real)}</td><td>${escapeHTML(users[i].pass)}</td></tr>`; 
+  }
+  
+  html += `</table>
+    <div class="small" style="margin-top:10px">Bu panel sadece root yetkisine sahip kullanıcılar tarafından görüntülenebilir.</div>
+    <button type="button" class="danger" style="margin-top:10px" onclick="resetVisits()">Ziyaretçi Sayacını Sıfırla</button>`;
+    
+  let el = document.getElementById('adminBox'); 
+  el.innerHTML = html; 
+  el.classList.remove('hidden');
+  document.getElementById('profileBox').classList.add('hidden');
+  document.getElementById('messagesBox').classList.add('hidden');
+}
+
+function resetVisits(){ 
+  if(!confirm('Ziyaretçi sayacı sıfırlansın mı?')) return; 
+  localStorage.setItem('hacker_visit_count', '0'); 
+  localStorage.setItem('hacker_last_visit', '-'); 
+  showAdmin(); 
+}
+
+getUsers();
+</script>
+</body>
+</html>
